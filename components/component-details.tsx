@@ -54,6 +54,15 @@ export function ComponentDetails({ component }: ComponentDetailsProps) {
     }
   }
 
+  // Generate initials safely with null checks
+  const getInitials = (name: string | undefined) => {
+    if (!name) return "NA"
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+  }
+
   return (
     <Tabs defaultValue="details" className="w-full">
       <TabsList className="mb-4">
@@ -79,11 +88,11 @@ export function ComponentDetails({ component }: ComponentDetailsProps) {
               </div>
               <div>
                 <h3 className="text-sm font-medium text-muted-foreground">Location</h3>
-                <p className="mt-1 text-base">{component.location}</p>
+                <p className="mt-1 text-base">{component.location || "Not specified"}</p>
               </div>
               <div>
                 <h3 className="text-sm font-medium text-muted-foreground">Function</h3>
-                <p className="mt-1 text-base">{component.function}</p>
+                <p className="mt-1 text-base">{component.function || "Not specified"}</p>
               </div>
               <div>
                 <h3 className="text-sm font-medium text-muted-foreground">Status</h3>
@@ -95,7 +104,9 @@ export function ComponentDetails({ component }: ComponentDetailsProps) {
               </div>
               <div>
                 <h3 className="text-sm font-medium text-muted-foreground">Last Updated</h3>
-                <p className="mt-1 text-base">{component.lastUpdated}</p>
+                <p className="mt-1 text-base">
+                  {component.lastUpdated || new Date(component.updatedAt).toLocaleDateString()}
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -122,15 +133,10 @@ export function ComponentDetails({ component }: ComponentDetailsProps) {
                 <h3 className="text-sm font-medium text-muted-foreground">Assigned To</h3>
                 <div className="mt-2 flex items-center gap-2">
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src="/placeholder.svg?height=32&width=32" alt={component.assignedTo} />
-                    <AvatarFallback>
-                      {component.assignedTo
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")}
-                    </AvatarFallback>
+                    <AvatarImage src="/placeholder.svg?height=32&width=32" alt={component.assignedTo || "Unassigned"} />
+                    <AvatarFallback>{getInitials(component.assignedTo)}</AvatarFallback>
                   </Avatar>
-                  <span>{component.assignedTo}</span>
+                  <span>{component.assignedTo || "Unassigned"}</span>
                 </div>
               </div>
             </CardContent>

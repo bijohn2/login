@@ -13,8 +13,8 @@ interface ComponentDetailsPageProps {
   }
 }
 
-export default function ComponentDetailsPage({ params }: ComponentDetailsPageProps) {
-  const component = getComponentById(params.id)
+export default async function ComponentDetailsPage({ params }: ComponentDetailsPageProps) {
+  const component = await getComponentById(params.id)
 
   if (!component) {
     notFound()

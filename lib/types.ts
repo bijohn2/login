@@ -10,6 +10,20 @@ export interface ComponentType {
   dueDate: string
   progress: number
   location: string
+  function?: string
+  buttons?: string
+  linkedPages?: string
+  notes?: string
+  lastUpdated?: string
+}
+
+export interface TeamMemberType {
+  id: string
+  name: string
+  role: string
+  email: string
+  avatar: string
+  status: string
 }
 
 export interface ComponentStats {
@@ -21,13 +35,4 @@ export interface ComponentStats {
   completedPercent: number
   highPriority: number
   highPriorityPercent: number
-}
-
-export interface TeamMemberType {
-  id: string
-  name: string
-  role: string
-  email: string
-  avatar: string
-  status: string
 }
