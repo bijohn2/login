@@ -13,11 +13,12 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from "@/components/ui/input"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Textarea } from "@/components/ui/textarea"
 import { toast } from "@/components/ui/use-toast"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import type { ComponentType } from "@/lib/types"
 import { saveComponent } from "@/lib/data"
+import { VoiceEnabledInput } from "@/components/voice-enabled-input"
+import { VoiceEnabledTextarea } from "@/components/voice-enabled-textarea"
 
 // Form schema
 const formSchema = z.object({
@@ -173,7 +174,7 @@ export function ComponentForm({ component }: ComponentFormProps) {
             <FormItem>
               <FormLabel>Name</FormLabel>
               <FormControl>
-                <Input placeholder="Component name" {...field} />
+                <VoiceEnabledInput placeholder="Component name" {...field} />
               </FormControl>
               <FormDescription>The name of your component.</FormDescription>
               <FormMessage />
@@ -188,7 +189,7 @@ export function ComponentForm({ component }: ComponentFormProps) {
             <FormItem>
               <FormLabel>Description</FormLabel>
               <FormControl>
-                <Textarea
+                <VoiceEnabledTextarea
                   placeholder="Describe the component"
                   className="resize-none"
                   {...field}
@@ -258,7 +259,7 @@ export function ComponentForm({ component }: ComponentFormProps) {
               <FormItem>
                 <FormLabel>Assigned To</FormLabel>
                 <FormControl>
-                  <Input placeholder="Team member name" {...field} value={field.value || ""} />
+                  <VoiceEnabledInput placeholder="Team member name" {...field} value={field.value || ""} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -272,7 +273,7 @@ export function ComponentForm({ component }: ComponentFormProps) {
               <FormItem>
                 <FormLabel>Location</FormLabel>
                 <FormControl>
-                  <Input placeholder="Component location" {...field} value={field.value || ""} />
+                  <VoiceEnabledInput placeholder="Component location" {...field} value={field.value || ""} />
                 </FormControl>
                 <FormDescription>Where this component is used (e.g., Header, Footer, Home Page)</FormDescription>
                 <FormMessage />

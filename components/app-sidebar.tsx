@@ -18,6 +18,7 @@ import {
   Music,
   Plug,
   Database,
+  Mic,
 } from "lucide-react"
 import { useAuth } from "@/lib/auth-context"
 
@@ -101,6 +102,11 @@ const items = [
     title: "Data Management",
     url: "/data-management",
     icon: Database,
+  },
+  {
+    title: "Voice Input",
+    url: "/voice-input-demo",
+    icon: Mic,
   },
   {
     title: "Settings",
