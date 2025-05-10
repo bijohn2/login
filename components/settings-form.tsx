@@ -23,6 +23,9 @@ const profileFormSchema = z.object({
     message: "Please enter a valid email address.",
   }),
   bio: z.string().optional(),
+  role: z.string().min(2, {
+    message: "Role must be at least 2 characters.",
+  }),
 })
 
 const notificationsFormSchema = z.object({
@@ -73,6 +76,7 @@ export function SettingsForm() {
       username: user?.name || "Jane Doe",
       email: user?.email || "jane.doe@example.com",
       bio: "Project Manager with 5+ years of experience in software development.",
+      role: user?.role || "Project Manager",
     },
   })
 
@@ -249,6 +253,20 @@ export function SettingsForm() {
                         <Input placeholder="Tell us about yourself" {...field} />
                       </FormControl>
                       <FormDescription>A brief description about yourself.</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={profileForm.control}
+                  name="role"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Role</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Your role in the organization" {...field} />
+                      </FormControl>
+                      <FormDescription>Your position or role in the organization.</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}

@@ -1,6 +1,7 @@
 import { DashboardHeader } from "@/components/dashboard-header"
 import { DashboardShell } from "@/components/dashboard-shell"
 import { ComponentCalendar } from "@/components/component-calendar"
+import "./calendar.css"
 
 export default function CalendarPage() {
   return (
