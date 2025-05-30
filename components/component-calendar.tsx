@@ -572,22 +572,22 @@ export function ComponentCalendar() {
                   Agenda
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-[700px]">
+              <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-hidden flex flex-col">
                 <DialogHeader>
                   <DialogTitle>Agenda</DialogTitle>
                   <DialogDescription>View upcoming events and create new ones</DialogDescription>
                 </DialogHeader>
 
-                <Tabs value={agendaTab} onValueChange={setAgendaTab} className="mt-2">
+                <Tabs value={agendaTab} onValueChange={setAgendaTab} className="mt-2 flex-1 flex flex-col">
                   <TabsList className="grid w-full grid-cols-2">
                     <TabsTrigger value="upcoming">Upcoming Events</TabsTrigger>
                     <TabsTrigger value="create">Create Event</TabsTrigger>
                   </TabsList>
 
-                  <TabsContent value="upcoming" className="space-y-4 py-4">
-                    <div className="max-h-[400px] overflow-y-auto">
+                  <TabsContent value="upcoming" className="flex-1 overflow-hidden flex flex-col">
+                    <div className="max-h-[60vh] overflow-y-auto pr-1">
                       {upcomingEvents.length > 0 ? (
-                        <div className="space-y-4">
+                        <div className="space-y-3">
                           {upcomingEvents.map((event) => {
                             const type = getEventType(event)
                             const typeColor =
@@ -596,7 +596,7 @@ export function ComponentCalendar() {
                             return (
                               <div
                                 key={event.id}
-                                className="flex items-start gap-4 p-3 rounded-md border hover:bg-accent/50 transition-colors"
+                                className="flex items-start gap-3 p-3 rounded-md border hover:bg-accent/50 transition-colors"
                                 style={{ borderLeft: `4px solid ${typeColor.dark}` }}
                               >
                                 <div className="flex-1">
@@ -612,7 +612,7 @@ export function ComponentCalendar() {
                                   {event.description && <p className="text-sm mt-2">{event.description}</p>}
 
                                   {event.linkedPages && event.linkedPages.length > 0 && (
-                                    <div className="flex flex-wrap gap-2 mt-3">
+                                    <div className="flex flex-wrap gap-2 mt-2">
                                       <span className="text-xs text-muted-foreground flex items-center">
                                         <LinkIcon className="h-3 w-3 mr-1" /> Linked pages:
                                       </span>
@@ -658,7 +658,7 @@ export function ComponentCalendar() {
                         <div className="py-8 text-center text-muted-foreground">No upcoming events found</div>
                       )}
                     </div>
-                    <div className="flex justify-between pt-4 border-t">
+                    <div className="flex justify-between pt-4 mt-auto border-t">
                       <Button variant="outline" onClick={() => setShowAgendaDialog(false)}>
                         Close
                       </Button>
@@ -674,308 +674,330 @@ export function ComponentCalendar() {
                     </div>
                   </TabsContent>
 
-                  <TabsContent value="create" className="py-4">
-                    <Form {...eventForm}>
-                      <form onSubmit={eventForm.handleSubmit(onSubmitEvent)} className="space-y-6">
-                        <div className="grid gap-4 md:grid-cols-2">
-                          <FormField
-                            control={eventForm.control}
-                            name="title"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Event Title</FormLabel>
-                                <FormControl>
-                                  <Input placeholder="Enter event title" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-
-                          <FormField
-                            control={eventForm.control}
-                            name="type"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Event Type</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                  <FormControl>
-                                    <SelectTrigger>
-                                      <SelectValue placeholder="Select event type" />
-                                    </SelectTrigger>
-                                  </FormControl>
-                                  <SelectContent>
-                                    <SelectItem value="Meeting">Meeting</SelectItem>
-                                    <SelectItem value="Deadline">Deadline</SelectItem>
-                                    <SelectItem value="Review">Review</SelectItem>
-                                    <SelectItem value="Development">Development</SelectItem>
-                                    <SelectItem value="Other">Other</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </div>
-
-                        <div className="grid gap-4 md:grid-cols-2">
-                          <FormField
-                            control={eventForm.control}
-                            name="status"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Status</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                  <FormControl>
-                                    <SelectTrigger>
-                                      <SelectValue placeholder="Select status" />
-                                    </SelectTrigger>
-                                  </FormControl>
-                                  <SelectContent>
-                                    <SelectItem value="Not Started">Not Started</SelectItem>
-                                    <SelectItem value="In Progress">In Progress</SelectItem>
-                                    <SelectItem value="In Development">In Development</SelectItem>
-                                    <SelectItem value="In Design">In Design</SelectItem>
-                                    <SelectItem value="In Review">In Review</SelectItem>
-                                    <SelectItem value="Completed">Completed</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-
-                          <FormField
-                            control={eventForm.control}
-                            name="priority"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Priority</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                  <FormControl>
-                                    <SelectTrigger>
-                                      <SelectValue placeholder="Select priority" />
-                                    </SelectTrigger>
-                                  </FormControl>
-                                  <SelectContent>
-                                    <SelectItem value="Low">Low</SelectItem>
-                                    <SelectItem value="Medium">Medium</SelectItem>
-                                    <SelectItem value="High">High</SelectItem>
-                                    <SelectItem value="Critical">Critical</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </div>
-
-                        <div className="grid gap-4 md:grid-cols-2">
+                  <TabsContent value="create" className="flex-1 overflow-hidden flex flex-col">
+                    <div className="max-h-[60vh] overflow-y-auto pr-1">
+                      <Form {...eventForm}>
+                        <form onSubmit={eventForm.handleSubmit(onSubmitEvent)} className="space-y-4">
+                          {/* Basic Information Section */}
                           <div className="space-y-4">
-                            <FormField
-                              control={eventForm.control}
-                              name="startDate"
-                              render={({ field }) => (
-                                <FormItem className="flex flex-col">
-                                  <FormLabel>Start Date</FormLabel>
-                                  <Popover>
-                                    <PopoverTrigger asChild>
-                                      <FormControl>
-                                        <Button
-                                          variant={"outline"}
-                                          className={cn(
-                                            "w-full pl-3 text-left font-normal",
-                                            !field.value && "text-muted-foreground",
-                                          )}
-                                        >
-                                          {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
-                                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                        </Button>
-                                      </FormControl>
-                                    </PopoverTrigger>
-                                    <PopoverContent className="w-auto p-0" align="start">
-                                      <CalendarComponent
-                                        mode="single"
-                                        selected={field.value}
-                                        onSelect={field.onChange}
-                                        initialFocus
-                                      />
-                                    </PopoverContent>
-                                  </Popover>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
+                            <div className="grid gap-3 md:grid-cols-2">
+                              <FormField
+                                control={eventForm.control}
+                                name="title"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Event Title</FormLabel>
+                                    <FormControl>
+                                      <Input placeholder="Enter event title" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
 
-                            <FormField
-                              control={eventForm.control}
-                              name="startTime"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Start Time</FormLabel>
-                                  <FormControl>
-                                    <Input type="time" {...field} disabled={eventForm.watch("allDay")} />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
+                              <FormField
+                                control={eventForm.control}
+                                name="type"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Event Type</FormLabel>
+                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                      <FormControl>
+                                        <SelectTrigger>
+                                          <SelectValue placeholder="Select event type" />
+                                        </SelectTrigger>
+                                      </FormControl>
+                                      <SelectContent>
+                                        <SelectItem value="Meeting">Meeting</SelectItem>
+                                        <SelectItem value="Deadline">Deadline</SelectItem>
+                                        <SelectItem value="Review">Review</SelectItem>
+                                        <SelectItem value="Development">Development</SelectItem>
+                                        <SelectItem value="Other">Other</SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
+
+                            <div className="grid gap-3 md:grid-cols-2">
+                              <FormField
+                                control={eventForm.control}
+                                name="status"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Status</FormLabel>
+                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                      <FormControl>
+                                        <SelectTrigger>
+                                          <SelectValue placeholder="Select status" />
+                                        </SelectTrigger>
+                                      </FormControl>
+                                      <SelectContent>
+                                        <SelectItem value="Not Started">Not Started</SelectItem>
+                                        <SelectItem value="In Progress">In Progress</SelectItem>
+                                        <SelectItem value="In Development">In Development</SelectItem>
+                                        <SelectItem value="In Design">In Design</SelectItem>
+                                        <SelectItem value="In Review">In Review</SelectItem>
+                                        <SelectItem value="Completed">Completed</SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+
+                              <FormField
+                                control={eventForm.control}
+                                name="priority"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Priority</FormLabel>
+                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                      <FormControl>
+                                        <SelectTrigger>
+                                          <SelectValue placeholder="Select priority" />
+                                        </SelectTrigger>
+                                      </FormControl>
+                                      <SelectContent>
+                                        <SelectItem value="Low">Low</SelectItem>
+                                        <SelectItem value="Medium">Medium</SelectItem>
+                                        <SelectItem value="High">High</SelectItem>
+                                        <SelectItem value="Critical">Critical</SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
                           </div>
 
-                          <div className="space-y-4">
+                          {/* Date and Time Section */}
+                          <div className="space-y-3">
                             <FormField
                               control={eventForm.control}
-                              name="endDate"
+                              name="allDay"
                               render={({ field }) => (
-                                <FormItem className="flex flex-col">
-                                  <FormLabel>End Date</FormLabel>
-                                  <Popover>
-                                    <PopoverTrigger asChild>
-                                      <FormControl>
-                                        <Button
-                                          variant={"outline"}
-                                          className={cn(
-                                            "w-full pl-3 text-left font-normal",
-                                            !field.value && "text-muted-foreground",
-                                          )}
-                                        >
-                                          {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
-                                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                        </Button>
-                                      </FormControl>
-                                    </PopoverTrigger>
-                                    <PopoverContent className="w-auto p-0" align="start">
-                                      <CalendarComponent
-                                        mode="single"
-                                        selected={field.value}
-                                        onSelect={field.onChange}
-                                        initialFocus
-                                      />
-                                    </PopoverContent>
-                                  </Popover>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-
-                            <FormField
-                              control={eventForm.control}
-                              name="endTime"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>End Time</FormLabel>
+                                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-2 shadow-sm">
+                                  <div className="space-y-0.5">
+                                    <FormLabel className="text-sm">All Day Event</FormLabel>
+                                  </div>
                                   <FormControl>
-                                    <Input type="time" {...field} disabled={eventForm.watch("allDay")} />
+                                    <Switch checked={field.value} onCheckedChange={field.onChange} />
                                   </FormControl>
-                                  <FormMessage />
                                 </FormItem>
                               )}
                             />
-                          </div>
-                        </div>
 
-                        <FormField
-                          control={eventForm.control}
-                          name="allDay"
-                          render={({ field }) => (
-                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
-                              <div className="space-y-0.5">
-                                <FormLabel>All Day Event</FormLabel>
-                                <FormDescription>Toggle if this is an all-day event</FormDescription>
-                              </div>
-                              <FormControl>
-                                <Switch checked={field.value} onCheckedChange={field.onChange} />
-                              </FormControl>
-                            </FormItem>
-                          )}
-                        />
-
-                        <FormField
-                          control={eventForm.control}
-                          name="description"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Description</FormLabel>
-                              <FormControl>
-                                <Textarea placeholder="Enter event description" className="resize-none" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
-                        <FormField
-                          control={eventForm.control}
-                          name="componentId"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Related Component</FormLabel>
-                              <Select onValueChange={field.onChange} value={field.value || "none"}>
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Select a component (optional)" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  <SelectItem value="none">None</SelectItem>
-                                  {components.map((component) => (
-                                    <SelectItem key={component.id} value={component.id}>
-                                      {component.name}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                              <FormDescription>Link this event to a specific component</FormDescription>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
-                        <div className="space-y-2">
-                          <Label>Linked Pages</Label>
-                          <div className="grid grid-cols-2 gap-2">
-                            {availablePages.map((page) => (
-                              <div key={page.id} className="flex items-center space-x-2">
-                                <input
-                                  type="checkbox"
-                                  id={`page-${page.id}`}
-                                  value={page.id}
-                                  className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
-                                  onChange={(e) => {
-                                    const currentPages = eventForm.getValues("linkedPages") || []
-                                    if (e.target.checked) {
-                                      eventForm.setValue("linkedPages", [...currentPages, page.id])
-                                    } else {
-                                      eventForm.setValue(
-                                        "linkedPages",
-                                        currentPages.filter((id) => id !== page.id),
-                                      )
-                                    }
-                                  }}
-                                  checked={(eventForm.getValues("linkedPages") || []).includes(page.id)}
+                            <div className="grid gap-3 md:grid-cols-2">
+                              <div>
+                                <FormField
+                                  control={eventForm.control}
+                                  name="startDate"
+                                  render={({ field }) => (
+                                    <FormItem className="flex flex-col">
+                                      <FormLabel>Start Date</FormLabel>
+                                      <Popover>
+                                        <PopoverTrigger asChild>
+                                          <FormControl>
+                                            <Button
+                                              variant={"outline"}
+                                              className={cn(
+                                                "w-full pl-3 text-left font-normal",
+                                                !field.value && "text-muted-foreground",
+                                              )}
+                                            >
+                                              {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
+                                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                            </Button>
+                                          </FormControl>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-auto p-0" align="start">
+                                          <CalendarComponent
+                                            mode="single"
+                                            selected={field.value}
+                                            onSelect={field.onChange}
+                                            initialFocus
+                                          />
+                                        </PopoverContent>
+                                      </Popover>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
                                 />
-                                <label
-                                  htmlFor={`page-${page.id}`}
-                                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                                >
-                                  {page.name}
-                                </label>
-                              </div>
-                            ))}
-                          </div>
-                          <p className="text-sm text-muted-foreground">
-                            Link this event to relevant pages in the application
-                          </p>
-                        </div>
 
-                        <div className="flex justify-between pt-4 border-t">
-                          <Button type="button" variant="outline" onClick={() => setAgendaTab("upcoming")}>
-                            Cancel
-                          </Button>
-                          <Button type="submit">Create Event</Button>
-                        </div>
-                      </form>
-                    </Form>
+                                {!eventForm.watch("allDay") && (
+                                  <FormField
+                                    control={eventForm.control}
+                                    name="startTime"
+                                    render={({ field }) => (
+                                      <FormItem className="mt-2">
+                                        <FormLabel>Start Time</FormLabel>
+                                        <FormControl>
+                                          <Input type="time" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                      </FormItem>
+                                    )}
+                                  />
+                                )}
+                              </div>
+
+                              <div>
+                                <FormField
+                                  control={eventForm.control}
+                                  name="endDate"
+                                  render={({ field }) => (
+                                    <FormItem className="flex flex-col">
+                                      <FormLabel>End Date</FormLabel>
+                                      <Popover>
+                                        <PopoverTrigger asChild>
+                                          <FormControl>
+                                            <Button
+                                              variant={"outline"}
+                                              className={cn(
+                                                "w-full pl-3 text-left font-normal",
+                                                !field.value && "text-muted-foreground",
+                                              )}
+                                            >
+                                              {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
+                                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                            </Button>
+                                          </FormControl>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-auto p-0" align="start">
+                                          <CalendarComponent
+                                            mode="single"
+                                            selected={field.value}
+                                            onSelect={field.onChange}
+                                            initialFocus
+                                          />
+                                        </PopoverContent>
+                                      </Popover>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+
+                                {!eventForm.watch("allDay") && (
+                                  <FormField
+                                    control={eventForm.control}
+                                    name="endTime"
+                                    render={({ field }) => (
+                                      <FormItem className="mt-2">
+                                        <FormLabel>End Time</FormLabel>
+                                        <FormControl>
+                                          <Input type="time" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                      </FormItem>
+                                    )}
+                                  />
+                                )}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Description and Links Section */}
+                          <div className="space-y-3">
+                            <FormField
+                              control={eventForm.control}
+                              name="description"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Description</FormLabel>
+                                  <FormControl>
+                                    <Textarea
+                                      placeholder="Enter event description"
+                                      className="resize-none h-20"
+                                      {...field}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+
+                            <FormField
+                              control={eventForm.control}
+                              name="componentId"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Related Component</FormLabel>
+                                  <Select onValueChange={field.onChange} value={field.value || "none"}>
+                                    <FormControl>
+                                      <SelectTrigger>
+                                        <SelectValue placeholder="Select a component (optional)" />
+                                      </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                      <SelectItem value="none">None</SelectItem>
+                                      {components.map((component) => (
+                                        <SelectItem key={component.id} value={component.id}>
+                                          {component.name}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                  <FormDescription className="text-xs">
+                                    Link this event to a specific component
+                                  </FormDescription>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+
+                            <div className="space-y-1">
+                              <Label className="text-sm">Linked Pages</Label>
+                              <div className="grid grid-cols-2 gap-1 border rounded-md p-2">
+                                {availablePages.map((page) => (
+                                  <div key={page.id} className="flex items-center space-x-2">
+                                    <input
+                                      type="checkbox"
+                                      id={`page-${page.id}`}
+                                      value={page.id}
+                                      className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                                      onChange={(e) => {
+                                        const currentPages = eventForm.getValues("linkedPages") || []
+                                        if (e.target.checked) {
+                                          eventForm.setValue("linkedPages", [...currentPages, page.id])
+                                        } else {
+                                          eventForm.setValue(
+                                            "linkedPages",
+                                            currentPages.filter((id) => id !== page.id),
+                                          )
+                                        }
+                                      }}
+                                      checked={(eventForm.getValues("linkedPages") || []).includes(page.id)}
+                                    />
+                                    <label
+                                      htmlFor={`page-${page.id}`}
+                                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                                    >
+                                      {page.name}
+                                    </label>
+                                  </div>
+                                ))}
+                              </div>
+                              <p className="text-xs text-muted-foreground">
+                                Link this event to relevant pages in the application
+                              </p>
+                            </div>
+                          </div>
+                        </form>
+                      </Form>
+                    </div>
+
+                    <div className="flex justify-between pt-4 mt-auto border-t">
+                      <Button type="button" variant="outline" onClick={() => setAgendaTab("upcoming")}>
+                        Cancel
+                      </Button>
+                      <Button type="button" onClick={eventForm.handleSubmit(onSubmitEvent)}>
+                        Create Event
+                      </Button>
+                    </div>
                   </TabsContent>
                 </Tabs>
               </DialogContent>
