@@ -23,7 +23,7 @@ export function AudioPlayer({ title, description, url, duration, date }: AudioPl
 
   // Create audio element
   useEffect(() => {
-    audioRef.current = new Audio("/placeholder.mp3") // Placeholder audio
+    audioRef.current = new Audio("https://hebbkx1anhila5yf.public.blob.vercel-storage.com/git-blob/prj_lNcjg8vwUSPNrMuV6ojJA4CZZOKn/AveNSe7qgXceyBWCjuwHHd/public/placeholder.mp3") // Placeholder audio
     audioRef.current.volume = volume
 
     return () => {
