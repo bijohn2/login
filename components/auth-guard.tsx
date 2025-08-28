@@ -2,22 +2,27 @@
 
 import type React from "react"
 
-import { useEffect } from "react"
-import { useRouter } from "next/navigation"
 import { useAuth } from "@/lib/auth-context"
+import { PageLoading } from "@/components/page-loading"
+import { useRouter } from "next/navigation"
+import { useEffect } from "react"
 
-export function AuthGuard({ children }: { children: React.ReactNode }) {
-  const { user, isLoading } = useAuth()
+interface AuthGuardProps {
+  children: React.ReactNode
+}
+
+export function AuthGuard({ children }: AuthGuardProps) {
+  const { user, loading } = useAuth()
   const router = useRouter()
 
   useEffect(() => {
-    if (!isLoading && !user) {
+    if (!loading && !user) {
       router.push("/login")
     }
-  }, [user, isLoading, router])
+  }, [user, loading, router])
 
-  if (isLoading) {
-    return <div className="flex h-screen items-center justify-center">Loading...</div>
+  if (loading) {
+    return <PageLoading />
   }
 
   if (!user) {

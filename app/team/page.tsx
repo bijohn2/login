@@ -1,8 +1,14 @@
+import type { Metadata } from "next"
 import { DashboardHeader } from "@/components/dashboard-header"
 import { DashboardShell } from "@/components/dashboard-shell"
 import { TeamMembers } from "@/components/team-members"
 import { Button } from "@/components/ui/button"
 import { UserPlus } from "lucide-react"
+
+export const metadata: Metadata = {
+  title: "Team Members | Project Component Tracker",
+  description: "Manage team members and their assigned components.",
+}
 
 export default function TeamPage() {
   return (

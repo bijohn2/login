@@ -1,3 +1,4 @@
+import type { Metadata } from "next"
 import { Suspense } from "react"
 import { DashboardHeader } from "@/components/dashboard-header"
 import { DashboardShell } from "@/components/dashboard-shell"
@@ -6,6 +7,11 @@ import { Button } from "@/components/ui/button"
 import { Upload } from "lucide-react"
 import Link from "next/link"
 import { AuthGuard } from "@/components/auth-guard"
+
+export const metadata: Metadata = {
+  title: "Files & Attachments | Project Component Tracker",
+  description: "Manage all files and attachments across your components.",
+}
 
 export default function FilesPage() {
   return (

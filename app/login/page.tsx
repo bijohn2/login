@@ -1,231 +1,171 @@
 "use client"
 
+import type React from "react"
+
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import Link from "next/link"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import * as z from "zod"
-import { useAuth } from "@/lib/auth-context"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { ListChecks, Loader2 } from "lucide-react"
-import { toast } from "@/components/ui/use-toast"
-
-const formSchema = z.object({
-  email: z.string().email({
-    message: "Please enter a valid email address.",
-  }),
-  password: z.string().min(6, {
-    message: "Password must be at least 6 characters.",
-  }),
-})
+import { Label } from "@/components/ui/label"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { useAuth } from "@/lib/auth-context"
+import { Logo } from "@/components/logo"
+import { Eye, EyeOff } from "lucide-react"
+import Link from "next/link"
 
 export default function LoginPage() {
-  const { login, loginWithGoogle } = useAuth()
-  const router = useRouter()
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  const [isGoogleLoading, setIsGoogleLoading] = useState(false)
+  const [error, setError] = useState("")
+  const { login } = useAuth()
+  const router = useRouter()
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-    },
-  })
-
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
     setIsLoading(true)
+    setError("")
 
     try {
-      const success = await login(values.email, values.password)
-
+      const success = await login(email, password)
       if (success) {
-        // Check if email is verified
-        if (!isEmailVerified(values.email)) {
-          toast({
-            title: "Email not verified",
-            description: "Please verify your email before logging in.",
-            variant: "destructive",
-          })
-          // Redirect to verification page
-          router.push(`/verify-email-code?email=${encodeURIComponent(values.email)}`)
-          return
-        }
-
-        toast({
-          title: "Login successful",
-          description: "You have been logged in successfully.",
-        })
         router.push("/")
       } else {
-        toast({
-          title: "Login failed",
-          description: "Invalid email or password. Try jane.doe@example.com / password",
-          variant: "destructive",
-        })
+        setError("Invalid email or password")
       }
-    } catch (error) {
-      toast({
-        title: "Login failed",
-        description: "An error occurred during login.",
-        variant: "destructive",
-      })
+    } catch (err) {
+      setError("Authentication failed. Please try again.")
     } finally {
       setIsLoading(false)
     }
   }
 
-  async function handleGoogleLogin() {
-    setIsGoogleLoading(true)
-
-    try {
-      const success = await loginWithGoogle()
-
-      if (success) {
-        toast({
-          title: "Login successful",
-          description: "You have been logged in with Google successfully.",
-        })
-        router.push("/")
-      } else {
-        toast({
-          title: "Login failed",
-          description: "Failed to login with Google. Please try again.",
-          variant: "destructive",
-        })
-      }
-    } catch (error) {
-      toast({
-        title: "Login failed",
-        description: "An error occurred during Google login.",
-        variant: "destructive",
-      })
-    } finally {
-      setIsGoogleLoading(false)
-    }
-  }
+  // Commented out demo functionality for production
+  // const handleDemoLogin = () => {
+  //   setEmail("jane.doe@example.com")
+  //   setPassword("password")
+  // }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 dark:bg-gray-900">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
-          <div className="flex items-center justify-center mb-6">
-            <div className="rounded-md bg-primary p-2">
-              <ListChecks className="h-8 w-8 text-primary-foreground" />
-            </div>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8">
+        <div className="text-center">
+          <div className="flex justify-center mb-6">
+            <Logo size="xl" />
           </div>
-          <CardTitle className="text-2xl text-center">Component Tracker</CardTitle>
-          <CardDescription className="text-center">Enter your credentials to access your account</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <Button
-            variant="outline"
-            className="w-full flex items-center justify-center gap-2"
-            onClick={handleGoogleLogin}
-            disabled={isGoogleLoading}
-          >
-            {isGoogleLoading ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <svg className="h-4 w-4" viewBox="0 0 24 24">
-                <path
-                  d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                  fill="#4285F4"
-                />
-                <path
-                  d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                  fill="#34A853"
-                />
-                <path
-                  d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                  fill="#FBBC05"
-                />
-                <path
-                  d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                  fill="#EA4335"
-                />
-              </svg>
-            )}
-            <span>{isGoogleLoading ? "Signing in with Google..." : "Sign in with Google"}</span>
-          </Button>
-
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
-            </div>
-          </div>
-
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input placeholder="jane.doe@example.com" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <div className="flex items-center justify-between">
-                      <FormLabel>Password</FormLabel>
-                      <Link href="/forgot-password" className="text-xs text-primary hover:underline">
-                        Forgot password?
-                      </Link>
-                    </div>
-                    <FormControl>
-                      <Input type="password" placeholder="••••••••" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Logging in...
-                  </>
-                ) : (
-                  "Log in"
-                )}
-              </Button>
-            </form>
-          </Form>
-        </CardContent>
-        <CardFooter className="flex flex-col space-y-2">
-          <div className="text-center text-sm">
-            Don't have an account?{" "}
-            <Link href="/register" className="text-primary hover:underline">
-              Sign up
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Sign in to your account</h2>
+          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+            Or{" "}
+            <Link href="/register" className="font-medium text-blue-600 hover:text-blue-500">
+              create a new account
             </Link>
-          </div>
-          <p className="mt-2 text-xs text-center text-muted-foreground">
-            <span className="font-medium">Demo credentials:</span> jane.doe@example.com / password
           </p>
-        </CardFooter>
-      </Card>
+        </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Welcome back</CardTitle>
+            <CardDescription>Enter your credentials to access your dashboard</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {error && (
+                <Alert variant="destructive">
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+
+              <div className="space-y-2">
+                <Label htmlFor="email">Email address</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter your email"
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Enter your password"
+                    required
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </Button>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="text-sm">
+                  <Link href="/forgot-password" className="font-medium text-blue-600 hover:text-blue-500">
+                    Forgot your password?
+                  </Link>
+                </div>
+              </div>
+
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? "Signing in..." : "Sign in"}
+              </Button>
+
+              {/* Demo functionality commented out for production */}
+              {/* 
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-300" />
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-2 bg-white dark:bg-gray-800 text-gray-500">Or try demo</span>
+                </div>
+              </div>
+
+              <Button type="button" variant="outline" className="w-full bg-transparent" onClick={handleDemoLogin}>
+                Use Demo Account
+              </Button>
+              */}
+            </form>
+
+            {/* Demo credentials section commented out */}
+            {/*
+            <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+              <h3 className="text-sm font-medium text-blue-900 dark:text-blue-100 mb-2">Demo Credentials</h3>
+              <div className="text-xs text-blue-700 dark:text-blue-300 space-y-1">
+                <p>
+                  <strong>Email:</strong> jane.doe@example.com
+                </p>
+                <p>
+                  <strong>Password:</strong> password
+                </p>
+              </div>
+            </div>
+            */}
+
+            <div className="mt-6 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+              <h3 className="text-sm font-medium text-green-900 dark:text-green-100 mb-2">Developer Access</h3>
+              <div className="text-xs text-green-700 dark:text-green-300 space-y-1">
+                <p>This is a development build. Authentication system is ready for integration.</p>
+                <p>Connect your preferred authentication provider (Supabase, Auth0, etc.)</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
-}
-
-async function isEmailVerified(email: string): Promise<boolean> {
-  // Placeholder function. Replace with actual verification logic.
-  // This could involve checking a database or calling an API.
-  return true // Assume all emails are verified for now.
 }

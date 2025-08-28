@@ -1,8 +1,14 @@
+import type { Metadata } from "next"
 import { Suspense } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Skeleton } from "@/components/ui/skeleton"
 import { AudioPlayer } from "@/components/audio-player"
+
+export const metadata: Metadata = {
+  title: "Audio Library | Project Component Tracker",
+  description: "Listen to recorded notes and meetings related to your components.",
+}
 
 // Sample audio data - in a real app, this would come from an API or database
 const audioFiles = [

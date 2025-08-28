@@ -10,293 +10,348 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Textarea } from "@/components/ui/textarea"
 import { toast } from "@/components/ui/use-toast"
-import { useAuth } from "@/lib/auth-context"
+import { Separator } from "@/components/ui/separator"
 import { ProfileImageUpload } from "@/components/profile-image-upload"
 
 const profileFormSchema = z.object({
-  username: z.string().min(2, {
-    message: "Username must be at least 2 characters.",
+  firstName: z.string().min(2, {
+    message: "First name must be at least 2 characters.",
+  }),
+  lastName: z.string().min(2, {
+    message: "Last name must be at least 2 characters.",
   }),
   email: z.string().email({
     message: "Please enter a valid email address.",
   }),
-  bio: z.string().optional(),
-  role: z.string().min(2, {
-    message: "Role must be at least 2 characters.",
-  }),
+  bio: z.string().max(160).min(4),
+  timezone: z.string(),
 })
 
-const notificationsFormSchema = z.object({
-  emailNotifications: z.boolean().default(true),
-  pushNotifications: z.boolean().default(false),
-  weeklyDigest: z.boolean().default(true),
-  marketingEmails: z.boolean().default(false),
+const notificationFormSchema = z.object({
+  emailNotifications: z.boolean().default(false).optional(),
+  pushNotifications: z.boolean().default(false).optional(),
+  marketingEmails: z.boolean().default(false).optional(),
+  securityAlerts: z.boolean().default(true).optional(),
 })
 
-const appearanceFormSchema = z.object({
-  theme: z.enum(["light", "dark", "system"], {
-    required_error: "Please select a theme.",
-  }),
-  fontSize: z.enum(["sm", "md", "lg"], {
-    required_error: "Please select a font size.",
-  }),
-})
-
-const billingFormSchema = z.object({
-  name: z.string().min(2, {
-    message: "Name must be at least 2 characters.",
-  }),
-  company: z.string().optional(),
-  address: z.string().min(5, {
-    message: "Address must be at least 5 characters.",
-  }),
-  city: z.string().min(2, {
-    message: "City must be at least 2 characters.",
-  }),
-  state: z.string().min(2, {
-    message: "State must be at least 2 characters.",
-  }),
-  zipCode: z.string().min(5, {
-    message: "Zip code must be at least 5 characters.",
-  }),
-  country: z.string().min(2, {
-    message: "Country must be at least 2 characters.",
-  }),
-})
+const securityFormSchema = z
+  .object({
+    currentPassword: z.string().min(8, {
+      message: "Password must be at least 8 characters.",
+    }),
+    newPassword: z.string().min(8, {
+      message: "Password must be at least 8 characters.",
+    }),
+    confirmPassword: z.string().min(8, {
+      message: "Password must be at least 8 characters.",
+    }),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  })
 
 export function SettingsForm() {
-  const [isPending, setIsPending] = useState(false)
-  const { user } = useAuth()
+  const [activeTab, setActiveTab] = useState("profile")
+  const [isLoading, setIsLoading] = useState(false)
+
+  // Load saved data from localStorage
+  const loadSavedData = () => {
+    if (typeof window !== "undefined") {
+      const savedProfile = localStorage.getItem("userProfile")
+      const savedNotifications = localStorage.getItem("userNotifications")
+
+      return {
+        profile: savedProfile
+          ? JSON.parse(savedProfile)
+          : {
+              firstName: "John",
+              lastName: "Doe",
+              email: "john@example.com",
+              bio: "I'm a software developer passionate about creating amazing user experiences.",
+              timezone: "UTC",
+            },
+        notifications: savedNotifications
+          ? JSON.parse(savedNotifications)
+          : {
+              emailNotifications: true,
+              pushNotifications: false,
+              marketingEmails: false,
+              securityAlerts: true,
+            },
+      }
+    }
+    return {
+      profile: {
+        firstName: "John",
+        lastName: "Doe",
+        email: "john@example.com",
+        bio: "I'm a software developer passionate about creating amazing user experiences.",
+        timezone: "UTC",
+      },
+      notifications: {
+        emailNotifications: true,
+        pushNotifications: false,
+        marketingEmails: false,
+        securityAlerts: true,
+      },
+    }
+  }
+
+  const savedData = loadSavedData()
 
   const profileForm = useForm<z.infer<typeof profileFormSchema>>({
     resolver: zodResolver(profileFormSchema),
+    defaultValues: savedData.profile,
+  })
+
+  const notificationForm = useForm<z.infer<typeof notificationFormSchema>>({
+    resolver: zodResolver(notificationFormSchema),
+    defaultValues: savedData.notifications,
+  })
+
+  const securityForm = useForm<z.infer<typeof securityFormSchema>>({
+    resolver: zodResolver(securityFormSchema),
     defaultValues: {
-      username: user?.name || "Jane Doe",
-      email: user?.email || "jane.doe@example.com",
-      bio: "Project Manager with 5+ years of experience in software development.",
-      role: user?.role || "Project Manager",
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: "",
     },
   })
 
-  const notificationsForm = useForm<z.infer<typeof notificationsFormSchema>>({
-    resolver: zodResolver(notificationsFormSchema),
-    defaultValues: {
-      emailNotifications: true,
-      pushNotifications: false,
-      weeklyDigest: true,
-      marketingEmails: false,
-    },
-  })
-
-  const appearanceForm = useForm<z.infer<typeof appearanceFormSchema>>({
-    resolver: zodResolver(appearanceFormSchema),
-    defaultValues: {
-      theme: "system",
-      fontSize: "md",
-    },
-  })
-
-  const billingForm = useForm<z.infer<typeof billingFormSchema>>({
-    resolver: zodResolver(billingFormSchema),
-    defaultValues: {
-      name: user?.name || "Jane Doe",
-      company: "Acme Inc",
-      address: "123 Main St",
-      city: "San Francisco",
-      state: "CA",
-      zipCode: "94105",
-      country: "United States",
-    },
-  })
-
-  function onProfileSubmit(data: z.infer<typeof profileFormSchema>) {
-    setIsPending(true)
+  function onProfileSubmit(values: z.infer<typeof profileFormSchema>) {
+    setIsLoading(true)
 
     // Simulate API call
     setTimeout(() => {
-      // Update user profile in a real app
-      console.log("Profile data:", data)
+      // Save to localStorage
+      if (typeof window !== "undefined") {
+        localStorage.setItem("userProfile", JSON.stringify(values))
 
-      toast({
-        title: "Profile updated",
-        description: "Your profile information has been updated.",
-      })
-      setIsPending(false)
-    }, 1000)
-  }
-
-  function onNotificationsSubmit(data: z.infer<typeof notificationsFormSchema>) {
-    setIsPending(true)
-
-    // Simulate API call
-    setTimeout(() => {
-      // Update notification preferences in a real app
-      console.log("Notification preferences:", data)
-
-      toast({
-        title: "Notification preferences updated",
-        description: "Your notification preferences have been updated.",
-      })
-      setIsPending(false)
-    }, 1000)
-  }
-
-  function onAppearanceSubmit(data: z.infer<typeof appearanceFormSchema>) {
-    setIsPending(true)
-
-    // Simulate API call
-    setTimeout(() => {
-      // Update appearance settings in a real app
-      console.log("Appearance settings:", data)
-
-      // Apply theme changes
-      const html = document.documentElement
-
-      if (data.theme === "dark") {
-        html.classList.add("dark")
-      } else if (data.theme === "light") {
-        html.classList.remove("dark")
-      } else {
-        // System preference
-        const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches
-        if (prefersDark) {
-          html.classList.add("dark")
-        } else {
-          html.classList.remove("dark")
+        // Update auth context if available
+        const currentUser = localStorage.getItem("currentUser")
+        if (currentUser) {
+          const user = JSON.parse(currentUser)
+          const updatedUser = {
+            ...user,
+            name: `${values.firstName} ${values.lastName}`,
+            email: values.email,
+            bio: values.bio,
+            timezone: values.timezone,
+          }
+          localStorage.setItem("currentUser", JSON.stringify(updatedUser))
         }
       }
 
-      // Apply font size changes
-      html.style.fontSize = data.fontSize === "sm" ? "14px" : data.fontSize === "lg" ? "18px" : "16px"
-
+      setIsLoading(false)
       toast({
-        title: "Appearance settings updated",
-        description: "Your appearance settings have been updated.",
+        title: "Profile updated successfully!",
+        description: "Your profile information has been saved.",
       })
-      setIsPending(false)
     }, 1000)
   }
 
-  function onBillingSubmit(data: z.infer<typeof billingFormSchema>) {
-    setIsPending(true)
+  function onNotificationSubmit(values: z.infer<typeof notificationFormSchema>) {
+    setIsLoading(true)
 
     // Simulate API call
     setTimeout(() => {
-      // Update billing information in a real app
-      console.log("Billing information:", data)
+      // Save to localStorage
+      if (typeof window !== "undefined") {
+        localStorage.setItem("userNotifications", JSON.stringify(values))
+      }
 
+      setIsLoading(false)
       toast({
-        title: "Billing information updated",
-        description: "Your billing information has been updated.",
+        title: "Notification preferences updated!",
+        description: "Your notification settings have been saved.",
       })
-      setIsPending(false)
     }, 1000)
   }
 
+  function onSecuritySubmit(values: z.infer<typeof securityFormSchema>) {
+    setIsLoading(true)
+
+    // Simulate API call
+    setTimeout(() => {
+      setIsLoading(false)
+      toast({
+        title: "Password updated successfully!",
+        description: "Your password has been changed.",
+      })
+      securityForm.reset()
+    }, 1000)
+  }
+
+  const tabs = [
+    { id: "profile", label: "Profile" },
+    { id: "notifications", label: "Notifications" },
+    { id: "security", label: "Security" },
+    { id: "billing", label: "Billing" },
+  ]
+
   return (
-    <Tabs defaultValue="profile" className="space-y-4">
-      <TabsList>
-        <TabsTrigger value="profile">Profile</TabsTrigger>
-        <TabsTrigger value="notifications">Notifications</TabsTrigger>
-        <TabsTrigger value="appearance">Appearance</TabsTrigger>
-        <TabsTrigger value="billing">Billing</TabsTrigger>
-      </TabsList>
+    <div className="space-y-6">
+      {/* Tab Navigation */}
+      <div className="border-b">
+        <nav className="-mb-px flex space-x-8">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
+                activeTab === tab.id
+                  ? "border-primary text-primary"
+                  : "border-transparent text-muted-foreground hover:text-foreground hover:border-gray-300"
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </nav>
+      </div>
 
-      <TabsContent value="profile">
+      {/* Profile Tab */}
+      {activeTab === "profile" && (
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Profile Information</CardTitle>
+              <CardDescription>Update your personal information and profile settings.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="flex items-center space-x-4">
+                <ProfileImageUpload />
+                <div>
+                  <h3 className="text-lg font-medium">Profile Picture</h3>
+                  <p className="text-sm text-muted-foreground">Upload a new profile picture</p>
+                </div>
+              </div>
+
+              <Separator />
+
+              <Form {...profileForm}>
+                <form onSubmit={profileForm.handleSubmit(onProfileSubmit)} className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={profileForm.control}
+                      name="firstName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>First Name</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={profileForm.control}
+                      name="lastName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Last Name</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <FormField
+                    control={profileForm.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <Input {...field} type="email" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={profileForm.control}
+                    name="bio"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Bio</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            placeholder="Tell us a little bit about yourself"
+                            className="resize-none"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          You can @mention other users and organizations to link to them.
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={profileForm.control}
+                    name="timezone"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Timezone</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select a timezone" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="UTC">UTC</SelectItem>
+                            <SelectItem value="EST">Eastern Time</SelectItem>
+                            <SelectItem value="PST">Pacific Time</SelectItem>
+                            <SelectItem value="GMT">Greenwich Mean Time</SelectItem>
+                            <SelectItem value="CET">Central European Time</SelectItem>
+                            <SelectItem value="JST">Japan Standard Time</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <Button type="submit" disabled={isLoading}>
+                    {isLoading ? "Updating..." : "Update Profile"}
+                  </Button>
+                </form>
+              </Form>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Notifications Tab */}
+      {activeTab === "notifications" && (
         <Card>
           <CardHeader>
-            <CardTitle>Profile</CardTitle>
-            <CardDescription>Manage your profile information.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <ProfileImageUpload />
-
-            <Form {...profileForm}>
-              <form onSubmit={profileForm.handleSubmit(onProfileSubmit)} className="space-y-4">
-                <FormField
-                  control={profileForm.control}
-                  name="username"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Username</FormLabel>
-                      <FormControl>
-                        <Input placeholder="janedoe" {...field} />
-                      </FormControl>
-                      <FormDescription>This is your public display name.</FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={profileForm.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email</FormLabel>
-                      <FormControl>
-                        <Input placeholder="jane.doe@example.com" {...field} />
-                      </FormControl>
-                      <FormDescription>We'll use this email to contact you.</FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={profileForm.control}
-                  name="bio"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Bio</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Tell us about yourself" {...field} />
-                      </FormControl>
-                      <FormDescription>A brief description about yourself.</FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={profileForm.control}
-                  name="role"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Role</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Your role in the organization" {...field} />
-                      </FormControl>
-                      <FormDescription>Your position or role in the organization.</FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <Button type="submit" disabled={isPending}>
-                  {isPending ? "Saving..." : "Save Changes"}
-                </Button>
-              </form>
-            </Form>
-          </CardContent>
-        </Card>
-      </TabsContent>
-
-      <TabsContent value="notifications">
-        <Card>
-          <CardHeader>
-            <CardTitle>Notifications</CardTitle>
+            <CardTitle>Notification Preferences</CardTitle>
             <CardDescription>Configure how you receive notifications.</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-2">
-            <Form {...notificationsForm}>
-              <form onSubmit={notificationsForm.handleSubmit(onNotificationsSubmit)} className="space-y-4">
+          <CardContent>
+            <Form {...notificationForm}>
+              <form onSubmit={notificationForm.handleSubmit(onNotificationSubmit)} className="space-y-6">
                 <FormField
-                  control={notificationsForm.control}
+                  control={notificationForm.control}
                   name="emailNotifications"
                   render={({ field }) => (
                     <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                       <div className="space-y-0.5">
                         <FormLabel className="text-base">Email Notifications</FormLabel>
-                        <FormDescription>Receive notifications via email.</FormDescription>
+                        <FormDescription>Receive notifications via email</FormDescription>
                       </div>
                       <FormControl>
                         <Switch checked={field.value} onCheckedChange={field.onChange} />
@@ -304,14 +359,15 @@ export function SettingsForm() {
                     </FormItem>
                   )}
                 />
+
                 <FormField
-                  control={notificationsForm.control}
+                  control={notificationForm.control}
                   name="pushNotifications"
                   render={({ field }) => (
                     <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                       <div className="space-y-0.5">
                         <FormLabel className="text-base">Push Notifications</FormLabel>
-                        <FormDescription>Receive push notifications in the app.</FormDescription>
+                        <FormDescription>Receive push notifications on your devices</FormDescription>
                       </div>
                       <FormControl>
                         <Switch checked={field.value} onCheckedChange={field.onChange} />
@@ -319,29 +375,15 @@ export function SettingsForm() {
                     </FormItem>
                   )}
                 />
+
                 <FormField
-                  control={notificationsForm.control}
-                  name="weeklyDigest"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                      <div className="space-y-0.5">
-                        <FormLabel className="text-base">Weekly Digest</FormLabel>
-                        <FormDescription>Receive a weekly summary of activity.</FormDescription>
-                      </div>
-                      <FormControl>
-                        <Switch checked={field.value} onCheckedChange={field.onChange} />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={notificationsForm.control}
+                  control={notificationForm.control}
                   name="marketingEmails"
                   render={({ field }) => (
                     <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                       <div className="space-y-0.5">
                         <FormLabel className="text-base">Marketing Emails</FormLabel>
-                        <FormDescription>Receive emails about new features and updates.</FormDescription>
+                        <FormDescription>Receive emails about new features and updates</FormDescription>
                       </div>
                       <FormControl>
                         <Switch checked={field.value} onCheckedChange={field.onChange} />
@@ -349,196 +391,133 @@ export function SettingsForm() {
                     </FormItem>
                   )}
                 />
-                <Button type="submit" disabled={isPending}>
-                  {isPending ? "Saving..." : "Save Changes"}
+
+                <FormField
+                  control={notificationForm.control}
+                  name="securityAlerts"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                      <div className="space-y-0.5">
+                        <FormLabel className="text-base">Security Alerts</FormLabel>
+                        <FormDescription>Receive alerts about security-related activities</FormDescription>
+                      </div>
+                      <FormControl>
+                        <Switch checked={field.value} onCheckedChange={field.onChange} />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+
+                <Button type="submit" disabled={isLoading}>
+                  {isLoading ? "Saving..." : "Save Preferences"}
                 </Button>
               </form>
             </Form>
           </CardContent>
         </Card>
-      </TabsContent>
+      )}
 
-      <TabsContent value="appearance">
+      {/* Security Tab */}
+      {activeTab === "security" && (
         <Card>
           <CardHeader>
-            <CardTitle>Appearance</CardTitle>
-            <CardDescription>Customize the appearance of the application.</CardDescription>
+            <CardTitle>Security Settings</CardTitle>
+            <CardDescription>Manage your password and security preferences.</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-2">
-            <Form {...appearanceForm}>
-              <form onSubmit={appearanceForm.handleSubmit(onAppearanceSubmit)} className="space-y-4">
+          <CardContent>
+            <Form {...securityForm}>
+              <form onSubmit={securityForm.handleSubmit(onSecuritySubmit)} className="space-y-4">
                 <FormField
-                  control={appearanceForm.control}
-                  name="theme"
+                  control={securityForm.control}
+                  name="currentPassword"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Theme</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a theme" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="light">Light</SelectItem>
-                          <SelectItem value="dark">Dark</SelectItem>
-                          <SelectItem value="system">System</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormDescription>Select a theme for the application.</FormDescription>
+                      <FormLabel>Current Password</FormLabel>
+                      <FormControl>
+                        <Input {...field} type="password" />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+
                 <FormField
-                  control={appearanceForm.control}
-                  name="fontSize"
+                  control={securityForm.control}
+                  name="newPassword"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Font Size</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a font size" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="sm">Small</SelectItem>
-                          <SelectItem value="md">Medium</SelectItem>
-                          <SelectItem value="lg">Large</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormDescription>Select a font size for the application.</FormDescription>
+                      <FormLabel>New Password</FormLabel>
+                      <FormControl>
+                        <Input {...field} type="password" />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-                <Button type="submit" disabled={isPending}>
-                  {isPending ? "Saving..." : "Save Changes"}
+
+                <FormField
+                  control={securityForm.control}
+                  name="confirmPassword"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Confirm New Password</FormLabel>
+                      <FormControl>
+                        <Input {...field} type="password" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <Button type="submit" disabled={isLoading}>
+                  {isLoading ? "Updating..." : "Update Password"}
                 </Button>
               </form>
             </Form>
           </CardContent>
         </Card>
-      </TabsContent>
+      )}
 
-      <TabsContent value="billing">
+      {/* Billing Tab */}
+      {activeTab === "billing" && (
         <Card>
           <CardHeader>
             <CardTitle>Billing Information</CardTitle>
-            <CardDescription>Manage your billing and payment information.</CardDescription>
+            <CardDescription>Manage your subscription and billing details.</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-6">
-            <Form {...billingForm}>
-              <form onSubmit={billingForm.handleSubmit(onBillingSubmit)} className="space-y-4">
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <FormField
-                    control={billingForm.control}
-                    name="name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Full Name</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Jane Doe" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={billingForm.control}
-                    name="company"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Company (Optional)</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Acme Inc" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={billingForm.control}
-                    name="address"
-                    render={({ field }) => (
-                      <FormItem className="col-span-2">
-                        <FormLabel>Address</FormLabel>
-                        <FormControl>
-                          <Input placeholder="123 Main St" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={billingForm.control}
-                    name="city"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>City</FormLabel>
-                        <FormControl>
-                          <Input placeholder="San Francisco" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={billingForm.control}
-                    name="state"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>State / Province</FormLabel>
-                        <FormControl>
-                          <Input placeholder="CA" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={billingForm.control}
-                    name="zipCode"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>ZIP / Postal Code</FormLabel>
-                        <FormControl>
-                          <Input placeholder="94105" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={billingForm.control}
-                    name="country"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Country</FormLabel>
-                        <FormControl>
-                          <Input placeholder="United States" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+          <CardContent className="space-y-4">
+            <div className="rounded-lg border p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-medium">Current Plan</h3>
+                  <p className="text-sm text-muted-foreground">Pro Plan - $29/month</p>
                 </div>
+                <Button variant="outline">Change Plan</Button>
+              </div>
+            </div>
 
-                <Button type="submit" disabled={isPending}>
-                  {isPending ? "Saving..." : "Save Changes"}
-                </Button>
-              </form>
-            </Form>
+            <div className="rounded-lg border p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-medium">Payment Method</h3>
+                  <p className="text-sm text-muted-foreground">**** **** **** 4242</p>
+                </div>
+                <Button variant="outline">Update</Button>
+              </div>
+            </div>
+
+            <div className="rounded-lg border p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-medium">Next Billing Date</h3>
+                  <p className="text-sm text-muted-foreground">September 15, 2025</p>
+                </div>
+                <Button variant="outline">View Invoices</Button>
+              </div>
+            </div>
           </CardContent>
         </Card>
-      </TabsContent>
-    </Tabs>
+      )}
+    </div>
   )
 }

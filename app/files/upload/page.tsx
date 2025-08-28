@@ -1,3 +1,4 @@
+import type { Metadata } from "next"
 import { DashboardHeader } from "@/components/dashboard-header"
 import { DashboardShell } from "@/components/dashboard-shell"
 import { FileUploadForm } from "@/components/file-upload-form"
@@ -5,6 +6,11 @@ import { AuthGuard } from "@/components/auth-guard"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { ChevronLeft } from "lucide-react"
+
+export const metadata: Metadata = {
+  title: "Upload Files | Project Component Tracker",
+  description: "Upload files and attachments to your components.",
+}
 
 export default function FileUploadPage() {
   return (

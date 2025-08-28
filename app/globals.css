@@ -92,3 +92,156 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer components {
+  /* Owl Eyes Animation */
+  .owl-eyes {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .owl-eyes::before,
+  .owl-eyes::after {
+    content: "";
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: #000;
+    border-radius: 50%;
+    animation: eyeMove 4s ease-in-out infinite;
+    z-index: 10;
+  }
+
+  .owl-eyes::before {
+    top: 35%;
+    left: 30%;
+    animation-delay: 0s;
+  }
+
+  .owl-eyes::after {
+    top: 35%;
+    right: 30%;
+    animation-delay: 0s;
+  }
+
+  @keyframes eyeMove {
+    0%,
+    20% {
+      transform: translateX(0);
+    }
+    40%,
+    60% {
+      transform: translateX(3px);
+    }
+    80%,
+    100% {
+      transform: translateX(-3px);
+    }
+  }
+
+  /* Menu Icon Animations */
+  .menu-icon {
+    transition: all 0.3s ease;
+  }
+
+  .menu-icon:hover {
+    transform: scale(1.1) rotate(5deg);
+  }
+
+  .menu-icon.home {
+    color: #3b82f6; /* Blue */
+  }
+
+  .menu-icon.analytics {
+    color: #10b981; /* Green */
+  }
+
+  .menu-icon.components {
+    color: #8b5cf6; /* Purple */
+  }
+
+  .menu-icon.team {
+    color: #f59e0b; /* Orange */
+  }
+
+  .menu-icon.calendar {
+    color: #ef4444; /* Red */
+  }
+
+  .menu-icon.audio {
+    color: #ec4899; /* Pink */
+  }
+
+  .menu-icon.files {
+    color: #06b6d4; /* Cyan */
+  }
+
+  .menu-icon.integrations {
+    color: #84cc16; /* Lime */
+  }
+
+  .menu-icon.database {
+    color: #6366f1; /* Indigo */
+  }
+
+  .menu-icon.notifications {
+    color: #f97316; /* Orange */
+  }
+
+  .menu-icon.downloads {
+    color: #14b8a6; /* Teal */
+  }
+
+  .menu-icon.admin {
+    color: #dc2626; /* Red */
+  }
+
+  .menu-icon.help {
+    color: #9333ea; /* Violet */
+  }
+
+  .menu-icon.feedback {
+    color: #059669; /* Emerald */
+  }
+
+  .menu-icon.settings {
+    color: #6b7280; /* Gray */
+  }
+
+  .menu-icon.projects {
+    color: #7c3aed; /* Violet */
+  }
+
+  /* Pulse animation for active icons */
+  .menu-icon.active {
+    animation: iconPulse 2s ease-in-out infinite;
+  }
+
+  @keyframes iconPulse {
+    0%,
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.7;
+      transform: scale(1.05);
+    }
+  }
+
+  /* Bounce animation for sidebar items */
+  .sidebar-item {
+    animation: slideInLeft 0.3s ease-out;
+  }
+
+  @keyframes slideInLeft {
+    from {
+      opacity: 0;
+      transform: translateX(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+}

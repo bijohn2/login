@@ -1,18 +1,31 @@
-import type React from "react"
-interface DashboardHeaderProps {
-  heading: string
-  text?: string
-  children?: React.ReactNode
-}
+"use client"
 
-export function DashboardHeader({ heading, text, children }: DashboardHeaderProps) {
+import { Button } from "@/components/ui/button"
+import { Plus, Download, Upload } from "lucide-react"
+
+export function DashboardHeader() {
   return (
-    <div className="flex items-center justify-between px-2">
-      <div className="grid gap-1">
-        <h1 className="text-2xl font-bold tracking-tight">{heading}</h1>
-        {text && <p className="text-muted-foreground">{text}</p>}
+    <div className="flex items-center justify-between">
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+        <p className="text-muted-foreground">Overview of your component tracking and project progress</p>
       </div>
-      {children}
+      <div className="flex items-center gap-2">
+        <Button variant="outline" size="sm">
+          <Download className="mr-2 h-4 w-4" />
+          Export
+        </Button>
+        <Button variant="outline" size="sm">
+          <Upload className="mr-2 h-4 w-4" />
+          Import
+        </Button>
+        <Button size="sm" asChild>
+          <a href="/components/new">
+            <Plus className="mr-2 h-4 w-4" />
+            New Component
+          </a>
+        </Button>
+      </div>
     </div>
   )
 }

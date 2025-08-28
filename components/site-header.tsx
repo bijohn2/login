@@ -1,141 +1,114 @@
 "use client"
 
-import Link from "next/link"
+import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { SidebarTrigger } from "@/components/ui/sidebar"
+import { Search, Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { SidebarTrigger } from "@/components/ui/sidebar"
+import { Separator } from "@/components/ui/separator"
+import { BreadcrumbNav } from "@/components/breadcrumb-nav"
 import { ModeToggle } from "@/components/mode-toggle"
-import { Search, Plus, LogIn, LogOut, Menu } from "lucide-react"
-import { useAuth } from "@/lib/auth-context"
 import { NotificationsDropdown } from "@/components/notifications-dropdown"
-import { Logo } from "@/components/logo"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { useState, useEffect } from "react"
-import { cn } from "@/lib/utils"
+import { QuickActionMenu } from "@/components/quick-action-menu"
 
 export function SiteHeader() {
-  const { user, logout } = useAuth()
+  const [searchOpen, setSearchOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState("")
   const router = useRouter()
-  const [isScrolled, setIsScrolled] = useState(false)
-  const [isSearchOpen, setIsSearchOpen] = useState(false)
 
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10)
+  const handleSearch = (query: string) => {
+    if (query.trim()) {
+      router.push(`/search?q=${encodeURIComponent(query)}`)
+      setSearchOpen(false)
+      setSearchQuery("")
     }
-    window.addEventListener("scroll", handleScroll)
-    return () => window.removeEventListener("scroll", handleScroll)
-  }, [])
-
-  const handleLogout = () => {
-    logout()
-    router.push("/login")
   }
 
+  const quickActions = [
+    { label: "New Component", href: "/components/new", icon: Plus },
+    { label: "Upload File", href: "/files/upload", icon: Plus },
+    { label: "Invite Team Member", href: "/team/invite", icon: Plus },
+  ]
+
   return (
-    <header
-      className={cn(
-        "sticky top-0 z-50 flex h-16 items-center gap-4 border-b bg-background/95 px-4 md:px-6 transition-all duration-200 backdrop-blur-sm",
-        isScrolled && "shadow-sm",
-      )}
-    >
-      <div className="flex items-center md:hidden">
-        <SidebarTrigger />
-      </div>
-      <div className="hidden md:flex">
-        <SidebarTrigger />
-      </div>
-      <div className="flex flex-1 items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Logo size="md" showText={true} />
-        </div>
-        <div className="flex items-center gap-2">
-          {user ? (
-            <>
-              <div
-                className={cn(
-                  "hidden md:block transition-all duration-200",
-                  isSearchOpen ? "w-[300px] lg:w-[400px]" : "w-[200px] lg:w-[300px]",
-                )}
-              >
-                <div className="relative">
-                  <Search
-                    className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground"
-                    onClick={() => setIsSearchOpen(true)}
-                  />
-                  <input
-                    type="search"
-                    placeholder="Search components..."
-                    className="rounded-md border border-input bg-background pl-8 pr-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 w-full"
-                    onFocus={() => setIsSearchOpen(true)}
-                    onBlur={() => setIsSearchOpen(false)}
-                  />
-                </div>
-              </div>
-              <div className="hidden sm:block">
-                <NotificationsDropdown />
-              </div>
-              <div className="hidden sm:block">
-                <Link href="/components/new">
-                  <Button size="sm">
-                    <Plus className="mr-1 h-4 w-4" />
-                    <span className="hidden md:inline">New Component</span>
-                    <span className="md:hidden">New</span>
-                  </Button>
-                </Link>
-              </div>
-              <div className="hidden sm:block">
-                <Button variant="ghost" size="sm" onClick={handleLogout}>
-                  <LogOut className="mr-1 h-4 w-4" />
-                  <span className="hidden md:inline">Log out</span>
-                </Button>
-              </div>
-              <div className="block sm:hidden">
-                <Sheet>
-                  <SheetTrigger asChild>
-                    <Button variant="ghost" size="icon">
-                      <Menu className="h-5 w-5" />
-                    </Button>
-                  </SheetTrigger>
-                  <SheetContent side="right" className="w-[250px] sm:w-[300px]">
-                    <div className="flex flex-col gap-4 py-4">
-                      <div className="relative">
-                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                        <input
-                          type="search"
-                          placeholder="Search components..."
-                          className="rounded-md border border-input bg-background pl-8 pr-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 w-full"
-                        />
-                      </div>
-                      <Link href="/components/new" className="w-full">
-                        <Button className="w-full" size="sm">
-                          <Plus className="mr-2 h-4 w-4" />
-                          New Component
-                        </Button>
-                      </Link>
-                      <Link href="/notifications" className="w-full">
-                        <Button variant="outline" className="w-full" size="sm">
-                          Notifications
-                        </Button>
-                      </Link>
-                      <Button variant="outline" size="sm" onClick={handleLogout} className="w-full">
-                        <LogOut className="mr-2 h-4 w-4" />
-                        Log out
-                      </Button>
-                    </div>
-                  </SheetContent>
-                </Sheet>
-              </div>
-            </>
-          ) : (
-            <Button size="sm" onClick={() => router.push("/login")}>
-              <LogIn className="mr-1 h-4 w-4" />
-              <span className="hidden md:inline">Log in</span>
-              <span className="md:hidden">Login</span>
+    <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
+      <SidebarTrigger className="-ml-1" />
+      <Separator orientation="vertical" className="mr-2 h-4" />
+      <BreadcrumbNav />
+
+      <div className="ml-auto flex items-center gap-2">
+        {/* Search Dialog */}
+        <Dialog open={searchOpen} onOpenChange={setSearchOpen}>
+          <DialogTrigger asChild>
+            <Button
+              variant="outline"
+              className="relative h-9 w-9 p-0 xl:h-10 xl:w-60 xl:justify-start xl:px-3 xl:py-2 bg-transparent"
+            >
+              <Search className="h-4 w-4 xl:mr-2" />
+              <span className="hidden xl:inline-flex">Search components...</span>
+              <kbd className="pointer-events-none absolute right-1.5 top-2 hidden h-6 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 xl:flex">
+                <span className="text-xs">⌘</span>K
+              </kbd>
             </Button>
-          )}
-          <ModeToggle />
-        </div>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Search</DialogTitle>
+              <DialogDescription>Search for components, files, team members, and more.</DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="flex items-center gap-2">
+                <Search className="h-4 w-4" />
+                <Input
+                  placeholder="Type to search..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      handleSearch(searchQuery)
+                    }
+                  }}
+                  className="flex-1"
+                />
+              </div>
+              <div className="space-y-2">
+                <h4 className="text-sm font-medium">Quick Actions</h4>
+                {quickActions.map((action) => (
+                  <Button
+                    key={action.label}
+                    variant="ghost"
+                    className="w-full justify-start"
+                    onClick={() => {
+                      router.push(action.href)
+                      setSearchOpen(false)
+                    }}
+                  >
+                    <action.icon className="mr-2 h-4 w-4" />
+                    {action.label}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Quick Action Menu */}
+        <QuickActionMenu />
+
+        {/* Notifications */}
+        <NotificationsDropdown />
+
+        {/* Theme Toggle */}
+        <ModeToggle />
       </div>
     </header>
   )

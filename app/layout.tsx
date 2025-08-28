@@ -1,25 +1,18 @@
 import type React from "react"
-import "@/app/globals.css"
+import type { Metadata } from "next"
 import { Inter } from "next/font/google"
+import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
-import { SiteHeader } from "@/components/site-header"
-import { SidebarProvider } from "@/components/ui/sidebar"
-import { AppSidebar } from "@/components/app-sidebar"
 import { AuthProvider } from "@/lib/auth-context"
+import { SidebarProvider } from "@/components/ui/sidebar"
 import { Toaster } from "@/components/ui/toaster"
-import { AnimatedBackground } from "@/components/animated-background"
-import { FeedbackButton } from "@/components/feedback-button"
-import { PlatformTutorial } from "@/components/platform-tutorial"
-import { BreadcrumbNav } from "@/components/breadcrumb-nav"
-import { KeyboardShortcuts } from "@/components/keyboard-shortcuts"
-import { ScrollToTop } from "@/components/scroll-to-top"
 
 const inter = Inter({ subsets: ["latin"] })
 
-export const metadata = {
-  title: "Project Component Tracker",
-  description: "Track and manage project components efficiently",
-    generator: 'v0.dev'
+export const metadata: Metadata = {
+  title: "TRACKERR - Component Tracking Dashboard",
+  description: "Track your website components, tasks, and project progress efficiently",
+    generator: 'v0.app'
 }
 
 export default function RootLayout({
@@ -30,27 +23,12 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <ThemeProvider attribute="class" defaultTheme="light">
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <AuthProvider>
             <SidebarProvider>
-              <AnimatedBackground>
-                <div className="relative flex min-h-screen flex-col">
-                  <SiteHeader />
-                  <div className="flex flex-1">
-                    <AppSidebar />
-                    <main className="flex-1 p-4 md:p-6">
-                      <BreadcrumbNav />
-                      {children}
-                    </main>
-                  </div>
-                </div>
-                <FeedbackButton />
-                <PlatformTutorial />
-                <KeyboardShortcuts />
-                <ScrollToTop />
-              </AnimatedBackground>
+              {children}
+              <Toaster />
             </SidebarProvider>
-            <Toaster />
           </AuthProvider>
         </ThemeProvider>
       </body>

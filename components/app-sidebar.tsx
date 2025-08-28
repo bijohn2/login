@@ -1,310 +1,408 @@
 "use client"
 
-import { usePathname, useRouter } from "next/navigation"
-import Link from "next/link"
+import * as React from "react"
+import { usePathname } from "next/navigation"
 import {
-  LayoutDashboard,
-  ListChecks,
-  Users,
+  AudioWaveform,
+  Bot,
+  Command,
+  Frame,
+  GalleryVerticalEnd,
+  Map,
+  PieChart,
+  Settings2,
+  ChevronRight,
+  Home,
   BarChart3,
+  Users,
+  FileText,
   Calendar,
-  Settings,
+  Bell,
   HelpCircle,
-  LogOut,
-  MessageSquare,
-  FileIcon,
   Download,
-  MessageCircle,
-  Music,
-  Plug,
   Database,
-  Mic,
+  Zap,
+  Shield,
+  Headphones,
+  FolderOpen,
 } from "lucide-react"
+import { NavProjects } from "@/components/nav-projects"
+import { NavUser } from "@/components/nav-user"
+import { TeamSwitcher } from "@/components/team-switcher"
 import { useAuth } from "@/lib/auth-context"
-
 import {
   Sidebar,
   SidebarContent,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
+  SidebarFooter,
   SidebarHeader,
+  SidebarRail,
+  SidebarGroup,
+  SidebarGroupLabel,
+  SidebarGroupContent,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarFooter,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
 } from "@/components/ui/sidebar"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+import { cn } from "@/lib/utils"
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Button } from "@/components/ui/button"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Logo } from "@/components/logo"
-import { Badge } from "@/components/ui/badge"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { useEffect, useState } from "react"
+// This is sample data.
+const data = {
+  user: {
+    name: "Developer",
+    email: "dev@trackerr.com",
+    avatar: "/avatars/developer.jpg",
+  },
+  teams: [
+    {
+      name: "TRACKERR Enterprise",
+      logo: GalleryVerticalEnd,
+      plan: "Enterprise",
+    },
+    {
+      name: "Development Team",
+      logo: AudioWaveform,
+      plan: "Pro",
+    },
+    {
+      name: "Design Studio",
+      logo: Command,
+      plan: "Free",
+    },
+  ],
+  navMain: [
+    {
+      title: "Dashboard",
+      url: "/",
+      icon: Home,
+      iconClass: "home",
+    },
+    {
+      title: "Analytics",
+      url: "/analytics",
+      icon: BarChart3,
+      iconClass: "analytics",
+      items: [
+        {
+          title: "Overview",
+          url: "/analytics",
+        },
+        {
+          title: "Progress",
+          url: "/analytics/progress",
+        },
+        {
+          title: "Team",
+          url: "/analytics/team",
+        },
+      ],
+    },
+    {
+      title: "Components",
+      url: "/components",
+      icon: FileText,
+      iconClass: "components",
+      items: [
+        {
+          title: "All Components",
+          url: "/components",
+        },
+        {
+          title: "New Component",
+          url: "/components/new",
+        },
+      ],
+    },
+    {
+      title: "Team",
+      url: "/team",
+      icon: Users,
+      iconClass: "team",
+      items: [
+        {
+          title: "Overview",
+          url: "/team",
+        },
+        {
+          title: "Invite Members",
+          url: "/team/invite",
+        },
+        {
+          title: "Roles",
+          url: "/team/roles",
+        },
+      ],
+    },
+    {
+      title: "Calendar",
+      url: "/calendar",
+      icon: Calendar,
+      iconClass: "calendar",
+    },
+    {
+      title: "Audio",
+      url: "/audio",
+      icon: Headphones,
+      iconClass: "audio",
+      items: [
+        {
+          title: "Audio Library",
+          url: "/audio",
+        },
+        {
+          title: "Upload Audio",
+          url: "/audio/upload",
+        },
+        {
+          title: "Voice Input Demo",
+          url: "/voice-input-demo",
+        },
+      ],
+    },
+    {
+      title: "Files",
+      url: "/files",
+      icon: FolderOpen,
+      iconClass: "files",
+      items: [
+        {
+          title: "File Manager",
+          url: "/files",
+        },
+        {
+          title: "Upload Files",
+          url: "/files/upload",
+        },
+      ],
+    },
+    {
+      title: "Integrations",
+      url: "/integrations",
+      icon: Zap,
+      iconClass: "integrations",
+      items: [
+        {
+          title: "Overview",
+          url: "/integrations",
+        },
+        {
+          title: "Supabase",
+          url: "/integrations/supabase",
+        },
+        {
+          title: "Vercel Blob",
+          url: "/integrations/blob",
+        },
+        {
+          title: "Google Sheets",
+          url: "/integrations/google-sheets",
+        },
+        {
+          title: "AI Capabilities",
+          url: "/integrations/ai",
+        },
+        {
+          title: "API Settings",
+          url: "/integrations/api",
+        },
+      ],
+    },
+    {
+      title: "Data Management",
+      url: "/data-management",
+      icon: Database,
+      iconClass: "database",
+    },
+    {
+      title: "Notifications",
+      url: "/notifications",
+      icon: Bell,
+      iconClass: "notifications",
+    },
+    {
+      title: "Downloads",
+      url: "/downloads",
+      icon: Download,
+      iconClass: "downloads",
+    },
+    {
+      title: "Help",
+      url: "/help",
+      icon: HelpCircle,
+      iconClass: "help",
+    },
+    {
+      title: "Feedback",
+      url: "/feedback",
+      icon: Bot,
+      iconClass: "feedback",
+    },
+    {
+      title: "Settings",
+      url: "/settings",
+      icon: Settings2,
+      iconClass: "settings",
+    },
+  ],
+  adminNav: [
+    {
+      title: "Admin",
+      url: "/admin",
+      icon: Shield,
+      iconClass: "admin",
+      items: [
+        {
+          title: "Users",
+          url: "/admin/users",
+        },
+        {
+          title: "Settings",
+          url: "/admin/settings",
+        },
+        {
+          title: "Support",
+          url: "/admin/support",
+        },
+      ],
+    },
+  ],
+  projects: [
+    {
+      name: "Design System",
+      url: "/projects/design-system",
+      icon: Frame,
+      iconClass: "projects",
+    },
+    {
+      name: "Sales & Marketing",
+      url: "/projects/marketing-site",
+      icon: PieChart,
+      iconClass: "projects",
+    },
+    {
+      name: "Travel",
+      url: "/projects/mobile-app",
+      icon: Map,
+      iconClass: "projects",
+    },
+  ],
+}
 
-// Menu items
-const items = [
-  {
-    title: "Dashboard",
-    url: "/",
-    icon: LayoutDashboard,
-    badge: null,
-  },
-  {
-    title: "Components",
-    url: "/components",
-    icon: ListChecks,
-    badge: null,
-  },
-  {
-    title: "Files",
-    url: "/files",
-    icon: FileIcon,
-    badge: null,
-  },
-  {
-    title: "Audio",
-    url: "/audio",
-    icon: Music,
-    badge: null,
-  },
-  {
-    title: "Downloads",
-    url: "/downloads",
-    icon: Download,
-    badge: null,
-  },
-  {
-    title: "Team",
-    url: "/team",
-    icon: Users,
-    badge: null,
-  },
-  {
-    title: "Analytics",
-    url: "/analytics",
-    icon: BarChart3,
-    badge: null,
-  },
-  {
-    title: "Calendar",
-    url: "/calendar",
-    icon: Calendar,
-    badge: null,
-  },
-  {
-    title: "Feedback",
-    url: "/feedback",
-    icon: MessageCircle,
-    badge: { text: "New", variant: "default" },
-  },
-  {
-    title: "Integrations",
-    url: "/integrations",
-    icon: Plug,
-    badge: null,
-  },
-  {
-    title: "Data Management",
-    url: "/data-management",
-    icon: Database,
-    badge: null,
-  },
-  {
-    title: "Voice Input",
-    url: "/voice-input-demo",
-    icon: Mic,
-    badge: { text: "Beta", variant: "secondary" },
-  },
-  {
-    title: "Settings",
-    url: "/settings",
-    icon: Settings,
-    badge: null,
-  },
-  {
-    title: "Help",
-    url: "/help",
-    icon: HelpCircle,
-    badge: null,
-  },
-]
-
-// Admin items
-const adminItems = [
-  {
-    title: "Support Requests",
-    url: "/admin/support",
-    icon: MessageSquare,
-    badge: { text: "3", variant: "destructive" },
-  },
-]
-
-export function AppSidebar() {
+export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname()
-  const router = useRouter()
-  const { user, logout } = useAuth()
-  const [isMobile, setIsMobile] = useState(false)
+  const { isAdmin } = useAuth()
+  const [openSections, setOpenSections] = React.useState<Record<string, boolean>>({})
 
-  useEffect(() => {
-    const checkScreenSize = () => {
-      setIsMobile(window.innerWidth < 768)
-    }
+  // Combine main nav with admin nav if user is admin
+  const allNavItems = React.useMemo(() => {
+    return isAdmin() ? [...data.navMain, ...data.adminNav] : data.navMain
+  }, [isAdmin])
 
-    checkScreenSize()
-    window.addEventListener("resize", checkScreenSize)
+  // Auto-expand sections based on current route
+  React.useEffect(() => {
+    const newOpenSections: Record<string, boolean> = {}
 
-    return () => {
-      window.removeEventListener("resize", checkScreenSize)
-    }
-  }, [])
+    allNavItems.forEach((item) => {
+      if (item.items) {
+        const isActive = item.items.some((subItem) => pathname === subItem.url) || pathname === item.url
+        newOpenSections[item.title] = isActive
+      }
+    })
 
-  // Check if the current path matches the item URL
-  const isActive = (url: string) => {
-    if (url === "/" && pathname === "/") return true
-    if (url !== "/" && pathname.startsWith(url)) return true
-    return false
-  }
+    setOpenSections(newOpenSections)
+  }, [pathname, allNavItems])
 
-  const handleLogout = () => {
-    logout()
-    router.push("/login")
-  }
-
-  if (!user) {
-    return null
+  const toggleSection = (title: string) => {
+    setOpenSections((prev) => ({
+      ...prev,
+      [title]: !prev[title],
+    }))
   }
 
   return (
-    <Sidebar>
-      <SidebarHeader className="flex items-center justify-between">
-        <div className="flex items-center space-x-2 px-2">
-          <Logo size="md" showText={!isMobile} />
-        </div>
+    <Sidebar collapsible="icon" {...props}>
+      <SidebarHeader>
+        <TeamSwitcher teams={data.teams} />
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+          <SidebarGroupLabel>Platform</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {items.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <SidebarMenuButton asChild tooltip={item.title} isActive={isActive(item.url)}>
-                          <Link href={item.url} className="flex items-center justify-between w-full">
-                            <div className="flex items-center">
-                              <item.icon />
-                              <span>{item.title}</span>
-                            </div>
-                            {item.badge && (
-                              <Badge
-                                variant={item.badge.variant as "default" | "secondary" | "destructive"}
-                                className="ml-auto"
-                              >
-                                {item.badge.text}
-                              </Badge>
+              {allNavItems.map((item, index) => {
+                const isActive =
+                  pathname === item.url || (item.items && item.items.some((subItem) => pathname === subItem.url))
+
+                if (item.items && item.items.length > 0) {
+                  return (
+                    <Collapsible
+                      key={item.title}
+                      asChild
+                      open={openSections[item.title]}
+                      onOpenChange={() => toggleSection(item.title)}
+                    >
+                      <SidebarMenuItem className="sidebar-item" style={{ animationDelay: `${index * 0.05}s` }}>
+                        <CollapsibleTrigger asChild>
+                          <SidebarMenuButton tooltip={item.title} isActive={isActive}>
+                            {item.icon && (
+                              <item.icon className={cn("menu-icon", item.iconClass, isActive && "active")} />
                             )}
-                          </Link>
-                        </SidebarMenuButton>
-                      </TooltipTrigger>
-                      <TooltipContent side="right">{item.title}</TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                </SidebarMenuItem>
-              ))}
+                            <span>{item.title}</span>
+                            <ChevronRight
+                              className={cn(
+                                "ml-auto transition-transform duration-200",
+                                openSections[item.title] ? "rotate-90" : "",
+                              )}
+                            />
+                          </SidebarMenuButton>
+                        </CollapsibleTrigger>
+                        <CollapsibleContent>
+                          <SidebarMenuSub>
+                            {item.items?.map((subItem) => (
+                              <SidebarMenuSubItem key={subItem.title}>
+                                <SidebarMenuSubButton asChild isActive={pathname === subItem.url}>
+                                  <a href={subItem.url}>
+                                    <span>{subItem.title}</span>
+                                  </a>
+                                </SidebarMenuSubButton>
+                              </SidebarMenuSubItem>
+                            ))}
+                          </SidebarMenuSub>
+                        </CollapsibleContent>
+                      </SidebarMenuItem>
+                    </Collapsible>
+                  )
+                }
+
+                return (
+                  <SidebarMenuItem
+                    key={item.title}
+                    className="sidebar-item"
+                    style={{ animationDelay: `${index * 0.05}s` }}
+                  >
+                    <SidebarMenuButton asChild tooltip={item.title} isActive={pathname === item.url}>
+                      <a href={item.url}>
+                        {item.icon && (
+                          <item.icon className={cn("menu-icon", item.iconClass, pathname === item.url && "active")} />
+                        )}
+                        <span>{item.title}</span>
+                      </a>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                )
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-
-        {/* Admin section - only visible to admins */}
-        {user.role === "Project Manager" && (
-          <SidebarGroup>
-            <SidebarGroupLabel>Admin</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {adminItems.map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <SidebarMenuButton asChild tooltip={item.title} isActive={isActive(item.url)}>
-                            <Link href={item.url} className="flex items-center justify-between w-full">
-                              <div className="flex items-center">
-                                <item.icon />
-                                <span>{item.title}</span>
-                              </div>
-                              {item.badge && (
-                                <Badge
-                                  variant={item.badge.variant as "default" | "secondary" | "destructive"}
-                                  className="ml-auto"
-                                >
-                                  {item.badge.text}
-                                </Badge>
-                              )}
-                            </Link>
-                          </SidebarMenuButton>
-                        </TooltipTrigger>
-                        <TooltipContent side="right">{item.title}</TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        )}
+        <NavProjects projects={data.projects} />
       </SidebarContent>
       <SidebarFooter>
-        <div className="flex items-center justify-between p-4">
-          <div className="flex items-center gap-2">
-            <Avatar className="h-8 w-8">
-              <AvatarImage src={user.avatar || "/placeholder.svg?height=32&width=32"} alt={user.name} />
-              <AvatarFallback>
-                {user.name
-                  .split(" ")
-                  .map((n) => n[0])
-                  .join("")}
-              </AvatarFallback>
-            </Avatar>
-            <div className="hidden sm:block">
-              <p className="text-sm font-medium">{user.name}</p>
-              <p className="text-xs text-muted-foreground">{user.role}</p>
-            </div>
-          </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <Settings className="h-4 w-4" />
-                <span className="sr-only">User menu</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>My Account</DropdownMenuLabel>
-              <DropdownMenuItem asChild>
-                <Link href="/settings">
-                  <Settings className="mr-2 h-4 w-4" />
-                  <span>Settings</span>
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleLogout}>
-                <LogOut className="mr-2 h-4 w-4" />
-                <span>Log out</span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+        <NavUser user={data.user} />
       </SidebarFooter>
+      <SidebarRail />
     </Sidebar>
   )
 }
